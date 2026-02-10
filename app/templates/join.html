@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+
+{% block title %}Rejoindre - Plateforme Logistique{% endblock %}
+
+{% block content %}
+<div class="join-container">
+    <div class="container">
+        <h1>{{ translations.get('join') }}</h1>
+        <p>Choisissez ce que vous voulez proposer</p>
+
+        <div class="join-choices">
+            <a href="{{ url_for('public.join_vehicle') }}" class="join-card">
+                <div class="join-icon">🚚</div>
+                <h3>{{ translations.get('vehicle_option') }}</h3>
+                <p>Je possède un véhicule</p>
+            </a>
+
+            <a href="{{ url_for('public.join_depot') }}" class="join-card">
+                <div class="join-icon">🏭</div>
+                <h3>{{ translations.get('depot_option') }}</h3>
+                <p>Je possède un dépôt</p>
+            </a>
+        </div>
+    </div>
+</div>
+{% endblock %}

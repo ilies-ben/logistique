@@ -1,0 +1,189 @@
+{% extends "base.html" %}
+
+{% block title %}Demandes en attente - Admin{% endblock %}
+
+{% block content %}
+<div class="admin-container">
+    <div class="container">
+        <div class="admin-header">
+            <h1>📋 Demandes en attente</h1>
+            <a href="{{ url_for('admin.dashboard') }}" class="btn btn-secondary">← Retour</a>
+        </div>
+
+        <div id="requests-list" class="requests-list">
+            <!-- Les demandes seront chargées via JavaScript -->
+        </div>
+    </div>
+</div>
+
+<script>
+    const requests = {{ requests|tojson }};
+
+    document.addEventListener('DOMContentLoaded', function() {
+        displayRequests();
+    });
+
+    function displayRequests() {
+        const container = document.getElementById('requests-list');
+        container.innerHTML = '';
+
+        if (requests.length === 0) {
+            container.innerHTML = '<p class="no-items">Aucune demande en attente</p>';
+            return;
+        }
+
+        requests.forEach(req => {
+            const card = document.createElement('div');
+            card.className = 'request-card';
+            
+            let content = '';
+            if (req.type === 'vehicle') {
+                const v = req.obj;
+                content = `
+                    <div class="request-type">🚚 Véhicule</div>
+                    <h3>${v.brand} ${v.model} (${v.year})</h3>
+                    <div class="request-info">
+                        <p><strong>Propriétaire:</strong> ${v.full_name}</p>
+                        <p><strong>Email:</strong> ${v.email}</p>
+                        <p><strong>Téléphone:</strong> ${v.phone}</p>
+                        <p><strong>Type:</strong> ${v.vehicle_type}</p>
+                        <p><strong>Localisation:</strong> ${v.location}</p>
+                        <p><strong>Matricule:</strong> ${v.registration}</p>
+                        <p><strong>Description:</strong> ${v.description}</p>
+                    </div>
+                `;
+            } else {
+                const d = req.obj;
+                content = `
+                    <div class="request-type">🏭 Dépôt</div>
+                    <h3>${d.area}m² - ${d.depot_type}</h3>
+                    <div class="request-info">
+                        <p><strong>Propriétaire:</strong> ${d.full_name}</p>
+                        <p><strong>Email:</strong> ${d.email}</p>
+                        <p><strong>Téléphone:</strong> ${d.phone}</p>
+                        <p><strong>Localisation:</strong> ${d.location}</p>
+                        <p><strong>Description:</strong> ${d.description}</p>
+                    </div>
+                `;
+            }
+
+            card.innerHTML = `
+                ${content}
+                <div class="request-actions">
+                    <button class="btn btn-primary" onclick="approveRequest('${req.type}', ${req.id})">✓ Approuver</button>
+                    <button class="btn btn-secondary" onclick="rejectRequest('${req.type}', ${req.id})">✗ Refuser</button>
+                </div>
+            `;
+            
+            container.appendChild(card);
+        });
+    }
+
+    function approveRequest(type, id) {
+        if (confirm('Êtes-vous sûr de vouloir approuver cette demande ?')) {
+            fetch(`/admin/api/request/${type}/${id}/approve`, {
+                method: 'POST'
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    alert('Demande approuvée!');
+                    location.reload();
+                } else {
+                    alert('Erreur: ' + data.error);
+                }
+            });
+        }
+    }
+
+    function rejectRequest(type, id) {
+        if (confirm('Êtes-vous sûr de vouloir refuser cette demande ?')) {
+            fetch(`/admin/api/request/${type}/${id}/reject`, {
+                method: 'POST'
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    alert('Demande refusée!');
+                    location.reload();
+                } else {
+                    alert('Erreur: ' + data.error);
+                }
+            });
+        }
+    }
+</script>
+
+<style>
+.admin-container { padding: 40px 0; }
+
+.admin-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 40px;
+    padding-bottom: 20px;
+    border-bottom: 2px solid #DDDDDD;
+}
+
+.requests-list {
+    display: grid;
+    gap: 20px;
+}
+
+.request-card {
+    background: white;
+    border: 1px solid #DDDDDD;
+    border-radius: 8px;
+    padding: 25px;
+    transition: all 0.3s ease;
+}
+
+.request-card:hover {
+    border-color: #FF8C00;
+    box-shadow: 0 4px 12px rgba(255, 140, 0, 0.15);
+}
+
+.request-type {
+    display: inline-block;
+    background-color: #FFF5F0;
+    color: #FF8C00;
+    padding: 6px 12px;
+    border-radius: 4px;
+    font-size: 12px;
+    font-weight: 600;
+    margin-bottom: 10px;
+}
+
+.request-card h3 {
+    font-size: 20px;
+    color: #333;
+    margin-bottom: 15px;
+}
+
+.request-info {
+    background-color: #F9F9F9;
+    padding: 15px;
+    border-radius: 4px;
+    margin-bottom: 15px;
+}
+
+.request-info p {
+    margin-bottom: 8px;
+    font-size: 14px;
+    color: #666;
+}
+
+.request-actions {
+    display: flex;
+    gap: 10px;
+}
+
+.no-items {
+    text-align: center;
+    padding: 40px;
+    color: #999;
+    font-size: 16px;
+}
+</style>
+{% endblock %}

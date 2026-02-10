@@ -1,0 +1,43 @@
+{% extends "base.html" %}
+
+{% block title %}Véhicules en attente{% endblock %}
+
+{% block content %}
+<div style="max-width: 1200px; margin: 0 auto; padding: 20px;">
+    <h1>Véhicules en attente ({{ pending_vehicles|length }})</h1>
+    
+    {% if pending_vehicles %}
+    <table border="1" style="width: 100%; border-collapse: collapse;">
+        <tr style="background: #f0f0f0;">
+            <th>Nom</th>
+            <th>Véhicule</th>
+            <th>Matricule</th>
+            <th>Téléphone</th>
+            <th>Date</th>
+            <th>Actions</th>
+        </tr>
+        {% for vehicle in pending_vehicles %}
+        <tr>
+            <td>{{ vehicle.full_name }}<br><small>{{ vehicle.email }}</small></td>
+            <td>{{ vehicle.brand }} {{ vehicle.model }} ({{ vehicle.year }})</td>
+            <td><strong>{{ vehicle.registration }}</strong></td>
+            <td>{{ vehicle.phone }}</td>
+            <td>{{ vehicle.created_at.strftime('%d/%m %H:%M') }}</td>
+            <td>
+                <form method="POST" action="/admin/approve-vehicle/{{ vehicle.id }}" style="display:inline;">
+                    <button type="submit" style="background:green;color:white;border:none;padding:5px 10px;">✅ Approuver</button>
+                </form>
+                <form method="POST" action="/admin/reject-vehicle/{{ vehicle.id }}" style="display:inline;">
+                    <button type="submit" style="background:red;color:white;border:none;padding:5px 10px;" onclick="return confirm('Rejeter?')">❌ Rejeter</button>
+                </form>
+            </td>
+        </tr>
+        {% endfor %}
+    </table>
+    {% else %}
+    <p>Aucune demande en attente</p>
+    {% endif %}
+    
+    <br><a href="{{ url_for('admin.dashboard') }}">← Retour Dashboard</a>
+</div>
+{% endblock %}

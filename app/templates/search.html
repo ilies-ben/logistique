@@ -1,0 +1,447 @@
+{% extends "base.html" %}
+
+{% block title %}Recherche - Plateforme Logistique{% endblock %}
+
+{% block content %}
+<div class="search-container">
+    <div class="container">
+        <!-- Selection type de recherche -->
+        <div class="search-type-selector">
+            <h1>Que cherchez-vous?</h1>
+            <div class="type-buttons">
+                <button id="type-vehicle" class="btn btn-primary active">
+                    Vehicule pour transport
+                </button>
+                <button id="type-depot" class="btn btn-secondary">
+                    Depot de stockage
+                </button>
+            </div>
+        </div>
+
+        <div class="search-content">
+            <!-- Filtres -->
+            <div class="filters-sidebar">
+                <h3>Filtrer</h3>
+                
+                <!-- Filtres Vehicules -->
+                <div id="vehicle-filters" class="filter-group">
+                    <div class="filter-item">
+                        <label for="vehicle-type-filter">Type de vehicule</label>
+                        <select id="vehicle-type-filter" class="form-control">
+                            <option value="">-- Tous les types --</option>
+                            <option value="light_car">Voiture legere</option>
+                            <option value="van">Fourgonnette</option>
+                            <option value="light_truck">Camion leger</option>
+                            <option value="heavy_truck">Camion lourd</option>
+                            <option value="car_carrier">Camion porte-voitures</option>
+                        </select>
+                    </div>
+                    
+                    <div class="filter-item">
+                        <label for="vehicle-location-filter">Localisation</label>
+                        <input type="text" id="vehicle-location-filter" class="form-control" placeholder="Ville ou region">
+                    </div>
+                </div>
+
+                <!-- Filtres Depots -->
+                <div id="depot-filters" class="filter-group" style="display: none;">
+                    <div class="filter-item">
+                        <label for="depot-type-filter">Type de depot</label>
+                        <select id="depot-type-filter" class="form-control">
+                            <option value="">-- Tous les types --</option>
+                            <option value="with_fridge">Avec frigo</option>
+                            <option value="without_fridge">Sans frigo</option>
+                        </select>
+                    </div>
+                    
+                    <div class="filter-item">
+                        <label for="area-min-filter">Superficie minimale (m2)</label>
+                        <input type="number" id="area-min-filter" class="form-control" placeholder="Min">
+                    </div>
+                    
+                    <div class="filter-item">
+                        <label for="area-max-filter">Superficie maximale (m2)</label>
+                        <input type="number" id="area-max-filter" class="form-control" placeholder="Max">
+                    </div>
+                    
+                    <div class="filter-item">
+                        <label for="depot-location-filter">Localisation</label>
+                        <input type="text" id="depot-location-filter" class="form-control" placeholder="Ville ou region">
+                    </div>
+                </div>
+
+                <div class="filter-actions">
+                    <button id="apply-filters" class="btn btn-primary btn-block">Appliquer</button>
+                    <button id="clear-filters" class="btn btn-secondary btn-block">Effacer</button>
+                </div>
+            </div>
+
+            <!-- Resultats -->
+            <div class="results-main">
+                <h2>Resultats</h2>
+                <div id="search-results" class="search-results-grid">
+                    <p class="loading">Chargement...</p>
+                </div>
+
+                <!-- Pagination -->
+                <div id="pagination" class="pagination-container"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="{{ url_for('static', filename='js/filters.js') }}"></script>
+<script>
+// Gerer le changement de type de recherche
+document.getElementById('type-vehicle').addEventListener('click', function() {
+    document.getElementById('vehicle-filters').style.display = 'block';
+    document.getElementById('depot-filters').style.display = 'none';
+    this.classList.add('active');
+    document.getElementById('type-depot').classList.remove('active');
+    filterManager.currentType = 'vehicle';
+    filterManager.loadResults('vehicle', 1);
+});
+
+document.getElementById('type-depot').addEventListener('click', function() {
+    document.getElementById('vehicle-filters').style.display = 'none';
+    document.getElementById('depot-filters').style.display = 'block';
+    this.classList.add('active');
+    document.getElementById('type-vehicle').classList.remove('active');
+    filterManager.currentType = 'depot';
+    filterManager.loadResults('depot', 1);
+});
+
+// Charger les resultats au demarrage
+document.addEventListener('DOMContentLoaded', function() {
+    filterManager.loadResults('vehicle', 1);
+});
+</script>
+
+<style>
+.search-container {
+    padding: 40px 0;
+    background: #f9f9f9;
+    min-height: 100vh;
+}
+
+.search-type-selector {
+    text-align: center;
+    margin-bottom: 50px;
+}
+
+.search-type-selector h1 {
+    font-size: 32px;
+    margin-bottom: 30px;
+    color: #333;
+}
+
+.type-buttons {
+    display: flex;
+    gap: 15px;
+    justify-content: center;
+    flex-wrap: wrap;
+}
+
+.type-buttons .btn {
+    padding: 14px 40px;
+    font-size: 16px;
+    font-weight: 600;
+    min-width: 250px;
+}
+
+.search-content {
+    display: grid;
+    grid-template-columns: 280px 1fr;
+    gap: 30px;
+}
+
+.filters-sidebar {
+    background: white;
+    padding: 30px;
+    border-radius: 12px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+    height: fit-content;
+    position: sticky;
+    top: 20px;
+}
+
+.filters-sidebar h3 {
+    margin: 0 0 20px 0;
+    color: #FF8C00;
+    font-size: 18px;
+    border-bottom: 2px solid #FF8C00;
+    padding-bottom: 12px;
+}
+
+.filter-group {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    margin-bottom: 25px;
+}
+
+.filter-item label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: 600;
+    color: #333;
+    font-size: 14px;
+}
+
+.filter-item input,
+.filter-item select {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    font-size: 14px;
+    transition: border-color 0.3s;
+}
+
+.filter-item input:focus,
+.filter-item select:focus {
+    outline: none;
+    border-color: #FF8C00;
+    box-shadow: 0 0 0 3px rgba(255, 140, 0, 0.1);
+}
+
+.filter-actions {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-top: 30px;
+    padding-top: 20px;
+    border-top: 1px solid #eee;
+}
+
+.btn-block {
+    width: 100%;
+}
+
+.results-main {
+    background: white;
+    padding: 30px;
+    border-radius: 12px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+}
+
+.results-main h2 {
+    margin: 0 0 30px 0;
+    color: #333;
+    font-size: 24px;
+}
+
+.search-results-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    gap: 20px;
+    margin-bottom: 40px;
+}
+
+.search-result-card {
+    background: white;
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+    transition: all 0.3s ease;
+    border: 1px solid #f0f0f0;
+}
+
+.search-result-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+    border-color: #FF8C00;
+}
+
+.card-image {
+    width: 100%;
+    height: 150px;
+    overflow: hidden;
+    background: #f0f0f0;
+}
+
+.card-image img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.3s;
+}
+
+.search-result-card:hover .card-image img {
+    transform: scale(1.05);
+}
+
+.card-body {
+    padding: 18px;
+}
+
+.card-body h3 {
+    font-size: 16px;
+    margin: 0 0 8px 0;
+    color: #333;
+    font-weight: 600;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.meta {
+    font-size: 12px;
+    color: #666;
+    margin-bottom: 10px;
+}
+
+.location {
+    font-weight: 600;
+    color: #FF8C00;
+    margin-bottom: 12px;
+    font-size: 13px;
+}
+
+.rating {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin-bottom: 15px;
+    font-size: 13px;
+}
+
+.rating .stars {
+    color: #FF8C00;
+    font-weight: 600;
+}
+
+.rating .count {
+    color: #999;
+    font-size: 12px;
+}
+
+.card-body .btn {
+    width: 100%;
+    padding: 10px;
+    font-size: 14px;
+    text-align: center;
+}
+
+.no-results {
+    text-align: center;
+    padding: 80px 40px;
+    background: #f9f9f9;
+    border-radius: 12px;
+    border: 2px dashed #ddd;
+}
+
+.no-results h3 {
+    color: #666;
+    margin-bottom: 12px;
+    font-size: 20px;
+}
+
+.no-results p {
+    color: #999;
+    font-size: 16px;
+}
+
+.loading {
+    text-align: center;
+    padding: 40px;
+    color: #999;
+    font-style: italic;
+}
+
+.pagination-container {
+    display: flex;
+    gap: 8px;
+    justify-content: center;
+    flex-wrap: wrap;
+    padding-top: 30px;
+    margin-top: 30px;
+    border-top: 1px solid #eee;
+}
+
+.pagination-container .btn {
+    padding: 8px 12px;
+    font-size: 13px;
+    min-width: 40px;
+    text-align: center;
+}
+
+.pagination-container .btn.btn-primary {
+    background: #FF8C00;
+    color: white;
+}
+
+/* Responsive */
+@media (max-width: 1024px) {
+    .search-content {
+        grid-template-columns: 250px 1fr;
+        gap: 20px;
+    }
+    
+    .search-results-grid {
+        grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+    }
+}
+
+@media (max-width: 768px) {
+    .search-content {
+        grid-template-columns: 1fr;
+    }
+    
+    .filters-sidebar {
+        position: relative;
+        top: 0;
+        order: 2;
+    }
+    
+    .results-main {
+        order: 1;
+    }
+    
+    .search-results-grid {
+        grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+        gap: 15px;
+    }
+    
+    .type-buttons {
+        flex-direction: column;
+    }
+    
+    .type-buttons .btn {
+        min-width: 100%;
+    }
+    
+    .card-body h3 {
+        font-size: 14px;
+    }
+    
+    .card-body {
+        padding: 12px;
+    }
+}
+
+@media (max-width: 480px) {
+    .search-container {
+        padding: 20px 0;
+    }
+    
+    .search-type-selector h1 {
+        font-size: 24px;
+        margin-bottom: 20px;
+    }
+    
+    .search-results-grid {
+        grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+    }
+    
+    .filter-actions {
+        flex-direction: row;
+    }
+    
+    .filter-actions .btn {
+        flex: 1;
+    }
+}
+</style>
+{% endblock %}
+

@@ -1,0 +1,446 @@
+{% extends "base.html" %}
+{% block title %}{{ vehicle.title }} - Détails{% endblock %}
+
+{% block content %}
+<div class="vehicle-detail-container">
+    <div class="container">
+        <!-- Header -->
+        <div class="detail-header">
+            <div class="vehicle-main-info">
+                <h1>{{ vehicle.title }}</h1>
+                <div class="vehicle-meta">
+                    <span class="location">📍 {{ vehicle.location or 'Localisation non spécifiée' }}</span>
+                    <span class="type">🚛 {{ vehicle.vehicle_type.replace('_', ' ').title() }}</span>
+                </div>
+                <div class="rating">
+                    <span class="stars">⭐⭐⭐⭐⭐</span>
+                    <span class="count">({{ vehicle.rating or 0 }} avis)</span>
+                </div>
+            </div>
+            <div class="vehicle-actions">
+                <a href="tel:{{ vehicle.phone or '+213 700 00 00 00' }}" class="btn btn-primary btn-large">
+                    📞 Contacter ({{ vehicle.phone or 'Numéro non disponible' }})
+                </a>
+                <button class="btn btn-secondary">❤️ Favoris</button>
+            </div>
+        </div>
+
+        <div class="detail-content">
+            <!-- Image principale -->
+            <div class="vehicle-gallery">
+                <div class="main-image">
+                    {% if vehicle.image_url %}
+                        <img src="{{ vehicle.image_url }}" alt="{{ vehicle.title }}">
+                    {% else %}
+                        <div class="image-placeholder">
+                            <svg viewBox="0 0 300 200" xmlns="http://www.w3.org/2000/svg">
+                                <rect width="300" height="200" fill="#f8f9fa"/>
+                                <rect x="50" y="50" width="200" height="100" rx="10" fill="#FF8C00" opacity="0.2"/>
+                                <circle cx="100" cy="100" r="30" fill="#FF8C00" opacity="0.5"/>
+                                <circle cx="200" cy="120" r="25" fill="#FFB84D" opacity="0.6"/>
+                                <text x="150" y="160" text-anchor="middle" fill="#666" font-size="24">Véhicule</text>
+                            </svg>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Infos techniques -->
+            <div class="vehicle-info-grid">
+                <div class="info-section">
+                    <h3>📋 Spécifications</h3>
+                    <div class="info-list">
+                        <div class="info-item">
+                            <span>Type:</span>
+                            <span>{{ vehicle.vehicle_type.replace('_', ' ').title() }}</span>
+                        </div>
+                        <div class="info-item">
+                            <span>Capacité:</span>
+                            <span>{{ vehicle.capacity or 'Non spécifié' }} tonnes</span>
+                        </div>
+                        <div class="info-item">
+                            <span>Prix:</span>
+                            <span>{{ vehicle.price or 'À négocier' }} DA/jour</span>
+                        </div>
+                        <div class="info-item">
+                            <span>Disponible dès:</span>
+                            <span>{{ vehicle.available_from or 'Immédiatement' }}</span>
+                        </div>
+                        <div class="info-item">
+                            <span>État:</span>
+                            <span class="status-good">✅ Excellent</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="info-section">
+                    <h3>👤 Contact</h3>
+                    <div class="contact-card">
+                        <div class="contact-icon">📞</div>
+                        <div class="contact-details">
+                            <h4>Transporteur vérifié</h4>
+                            <p>{{ vehicle.owner_name or 'Propriétaire vérifié' }}</p>
+                            <div class="contact-actions">
+                                <a href="tel:{{ vehicle.phone or '+213 700 00 00 00' }}" class="btn-contact">Appeler</a>
+                                <a href="mailto:{{ vehicle.email or 'contact@logistique.dz' }}" class="btn-email">Email</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Description -->
+            <div class="vehicle-description">
+                <h3>📝 Description complète</h3>
+                <p>
+                    {{ vehicle.description or "Véhicule professionnel en excellent état, régulièrement entretenu et prêt à rouler. Idéal pour tous types de transport. Contactez-nous pour disponibilités et devis personnalisé." }}
+                </p>
+            </div>
+
+            <!-- Boutons d'action -->
+            <div class="action-section">
+                <a href="tel:{{ vehicle.phone or '+213 700 00 00 00' }}" class="btn-action-primary">
+                    🚀 Réserver maintenant
+                </a>
+                <a href="{{ url_for('public.search') }}" class="btn-action-secondary">
+                    ← Retour aux résultats
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.vehicle-detail-container {
+    padding: 40px 0;
+    background: linear-gradient(135deg, #f5fbff 0%, #fffbf5 100%);
+    min-height: 100vh;
+}
+
+.detail-header {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: 40px;
+    align-items: start;
+    margin-bottom: 40px;
+    background: rgba(255,255,255,0.95);
+    backdrop-filter: blur(10px);
+    padding: 40px;
+    border-radius: 25px;
+    box-shadow: 0 10px 40px rgba(0,0,0,0.1);
+    border: 1px solid rgba(255,140,0,0.1);
+}
+
+.vehicle-main-info h1 {
+    color: #333;
+    font-size: 36px;
+    margin-bottom: 20px;
+    font-weight: 700;
+    line-height: 1.2;
+}
+
+.vehicle-meta {
+    display: flex;
+    gap: 25px;
+    margin-bottom: 20px;
+    flex-wrap: wrap;
+}
+
+.location, .type {
+    padding: 8px 16px;
+    border-radius: 25px;
+    font-weight: 600;
+    font-size: 15px;
+}
+
+.location {
+    background: linear-gradient(135deg, #FF8C00, #FFB84D);
+    color: white;
+}
+
+.type {
+    background: rgba(255,140,0,0.1);
+    color: #FF8C00;
+    border: 2px solid rgba(255,140,0,0.2);
+}
+
+.rating {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    font-size: 16px;
+}
+
+.stars {
+    color: #FF8C00;
+    font-size: 24px;
+}
+
+.vehicle-actions {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    min-width: 220px;
+}
+
+.btn {
+    padding: 16px 24px;
+    border-radius: 15px;
+    font-weight: 600;
+    text-decoration: none;
+    display: inline-block;
+    text-align: center;
+    transition: all 0.3s ease;
+    border: none;
+    cursor: pointer;
+}
+
+.btn-large { font-size: 16px; }
+
+.btn-primary {
+    background: linear-gradient(135deg, #FF8C00, #FFB84D);
+    color: white;
+    box-shadow: 0 8px 25px rgba(255,140,0,0.3);
+}
+
+.btn-primary:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 12px 35px rgba(255,140,0,0.4);
+}
+
+.btn-secondary {
+    background: #f8f9fa;
+    color: #666;
+    border: 2px solid #e9ecef;
+}
+
+.btn-secondary:hover {
+    background: #e9ecef;
+    transform: translateY(-2px);
+}
+
+.main-image {
+    position: relative;
+    border-radius: 25px;
+    overflow: hidden;
+    box-shadow: 0 12px 40px rgba(0,0,0,0.1);
+    margin-bottom: 40px;
+    background: linear-gradient(135deg, #f8f9fa, #e9ecef);
+}
+
+.main-image img {
+    width: 100%;
+    height: 450px;
+    object-fit: cover;
+    display: block;
+}
+
+.image-placeholder {
+    width: 100%;
+    height: 450px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(135deg, #f8f9fa, #e9ecef);
+}
+
+.image-placeholder svg {
+    width: 80%;
+    height: 80%;
+    max-height: 300px;
+}
+
+.vehicle-info-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 40px;
+    margin-bottom: 40px;
+}
+
+.info-section {
+    background: rgba(255,255,255,0.9);
+    backdrop-filter: blur(10px);
+    padding: 35px;
+    border-radius: 20px;
+    box-shadow: 0 8px 30px rgba(0,0,0,0.08);
+    border: 1px solid rgba(255,140,0,0.1);
+}
+
+.info-section h3 {
+    color: #333;
+    margin-bottom: 25px;
+    font-size: 22px;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.info-list {
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+}
+
+.info-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 15px;
+    background: #fafbfc;
+    border-radius: 12px;
+    border-left: 4px solid #FF8C00;
+}
+
+.info-item span:first-child {
+    color: #666;
+    font-weight: 600;
+    font-size: 15px;
+}
+
+.status-good {
+    color: #28a745;
+    font-weight: 700;
+}
+
+.contact-card {
+    display: flex;
+    gap: 20px;
+    align-items: center;
+}
+
+.contact-icon {
+    width: 70px;
+    height: 70px;
+    background: linear-gradient(135deg, #FF8C00, #FFB84D);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 28px;
+    color: white;
+    flex-shrink: 0;
+}
+
+.contact-details h4 {
+    margin: 0 0 8px 0;
+    color: #333;
+    font-size: 20px;
+}
+
+.contact-details p {
+    color: #666;
+    margin-bottom: 15px;
+}
+
+.contact-actions {
+    display: flex;
+    gap: 10px;
+}
+
+.btn-contact, .btn-email {
+    padding: 10px 20px;
+    border-radius: 25px;
+    font-size: 14px;
+    font-weight: 600;
+    text-decoration: none;
+}
+
+.btn-contact {
+    background: #28a745;
+    color: white;
+}
+
+.btn-email {
+    background: #007bff;
+    color: white;
+}
+
+.vehicle-description {
+    background: rgba(255,255,255,0.9);
+    backdrop-filter: blur(10px);
+    padding: 40px;
+    border-radius: 20px;
+    box-shadow: 0 8px 30px rgba(0,0,0,0.08);
+    margin-bottom: 40px;
+    border: 1px solid rgba(255,140,0,0.1);
+}
+
+.vehicle-description h3 {
+    color: #333;
+    margin-bottom: 20px;
+    font-size: 22px;
+}
+
+.vehicle-description p {
+    color: #555;
+    line-height: 1.8;
+    font-size: 16px;
+}
+
+.action-section {
+    display: flex;
+    gap: 20px;
+    justify-content: center;
+    flex-wrap: wrap;
+}
+
+.btn-action-primary {
+    background: linear-gradient(135deg, #28a745, #20c997);
+    color: white;
+    padding: 20px 50px;
+    font-size: 18px;
+    box-shadow: 0 10px 30px rgba(40, 167, 69, 0.3);
+}
+
+.btn-action-primary:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 15px 40px rgba(40, 167, 69, 0.4);
+}
+
+.btn-action-secondary {
+    background: #6c757d;
+    color: white;
+    padding: 20px 30px;
+    font-size: 16px;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .detail-header {
+        grid-template-columns: 1fr;
+        gap: 25px;
+        padding: 25px;
+    }
+    
+    .vehicle-info-grid {
+        grid-template-columns: 1fr;
+        gap: 25px;
+    }
+    
+    .main-image img, .image-placeholder {
+        height: 280px;
+    }
+    
+    .action-section {
+        flex-direction: column;
+        align-items: center;
+    }
+    
+    .contact-actions {
+        flex-direction: column;
+    }
+}
+
+@media (max-width: 480px) {
+    .vehicle-detail-container {
+        padding: 20px 0;
+    }
+    
+    .vehicle-main-info h1 {
+        font-size: 28px;
+    }
+}
+</style>
+{% endblock %}
+

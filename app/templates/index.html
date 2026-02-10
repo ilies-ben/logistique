@@ -1,0 +1,62 @@
+{% extends "base.html" %}
+
+{% block title %}{{ translations.get('welcome') }} - Plateforme Logistique{% endblock %}
+
+{% block content %}
+<section class="hero">
+    <div class="container">
+        <div class="hero-content">
+            <h1>{{ translations.get('welcome') }}</h1>
+            <p>Connectez-vous avec les meilleurs prestataires de logistique</p>
+        </div>
+    </div>
+</section>
+
+<section class="choices-section">
+    <div class="container">
+        <div class="choices-grid">
+            <!-- Véhicules -->
+            <div class="choice-card">
+                <div class="choice-icon">🚚</div>
+                <h3>{{ translations.get('find_vehicle') }}</h3>
+                <p>Trouvez le véhicule idéal pour votre transport</p>
+                <a href="{{ url_for('public.search', type='vehicle') }}" class="btn btn-primary">{{ translations.get('view_vehicles') }}</a>
+            </div>
+            
+            <!-- Dépôts -->
+            <div class="choice-card">
+                <div class="choice-icon">🏭</div>
+                <h3>{{ translations.get('find_depot') }}</h3>
+                <p>Découvrez nos espaces de stockage</p>
+                <a href="{{ url_for('public.search', type='depot') }}" class="btn btn-primary">{{ translations.get('view_depots') }}</a>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section class="cta-section">
+    <div class="container">
+        <div class="cta-content">
+            <h2>Vous êtes prestataire ?</h2>
+            <p>Rejoignez notre plateforme et trouvez de nouveaux clients</p>
+            <a href="{{ url_for('public.join') }}" class="btn btn-primary btn-lg">{{ translations.get('join') }}</a>
+        </div>
+    </div>
+</section>
+
+<section id="contact" class="contact-section">
+    <div class="container">
+        <h2>{{ translations.get('contact') }}</h2>
+        <div class="contact-info">
+            <div class="contact-item">
+                <h4>📧 Email</h4>
+                <a href="mailto:support@plateforme-logistique.com">support@plateforme-logistique.com</a>
+            </div>
+            <div class="contact-item">
+                <h4>📱 Téléphone</h4>
+                <a href="tel:+213000000000">+213 (0) 000 00 00</a>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}
