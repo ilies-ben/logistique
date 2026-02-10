@@ -2,22 +2,14 @@ import os
 from dotenv import load_dotenv
 from app import create_app, db
 
-# Charger les variables d'environnement
+# Charger variables d'environnement
 load_dotenv()
 
-# Créer l'application Flask
+# Créer l'application
 app = create_app()
 
-# Contexte pour les commandes CLI
-with app.app_context():
-    # Créer les tables si elles n'existent pas
-    db.create_all()
-    print("✅ Base de données initialisée")
+# Export pour Gunicorn
+application = app  # ← RENDERC LE VEUT!
 
 if __name__ == '__main__':
-    # Mode développement
-    app.run(
-        host='0.0.0.0',
-        port=5000,
-        debug=True
-    )
+    app.run(host='0.0.0.0', port=int(os.environ.get('PORT', 5000)), debug=True)
