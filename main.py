@@ -1,14 +1,8 @@
-import os
-from dotenv import load_dotenv
-from app import create_app, db
-
-load_dotenv()
+from app import create_app
 
 app = create_app()
-
-# Gunicorn
-application = app
+application = app  # Gunicorn l'utilise
 
 if __name__ == '__main__':
     port = int(os.environ.get('PORT', 5000))
-    app.run(host='0.0.0.0', port=port, debug=True)
+    app.run(host='0.0.0.0', port=port, debug=False)
